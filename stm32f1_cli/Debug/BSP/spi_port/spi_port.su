@@ -1,0 +1,10 @@
+../BSP/spi_port/spi_port.c:8:27:spi_port_get_handle	16	static
+../BSP/spi_port/spi_port.c:21:9:spi_port_is_enabled	16	static
+../BSP/spi_port/spi_port.c:34:9:spi_port_write	32	static
+../BSP/spi_port/spi_port.c:49:9:spi_port_read	32	static
+../BSP/spi_port/spi_port.c:64:9:spi_port_transfer	40	static
+../BSP/spi_port/spi_port.c:80:9:spi_port_is_slave	24	static
+../BSP/spi_port/spi_port.c:87:9:spi_port_start_slave_transfer_it	32	static
+../BSP/spi_port/spi_port.c:99:9:spi_port_abort_it	24	static
+../BSP/spi_port/spi_port.c:106:9:spi_port_init	24	static
+../BSP/spi_port/spi_port.c:113:9:spi_port_deinit	24	static

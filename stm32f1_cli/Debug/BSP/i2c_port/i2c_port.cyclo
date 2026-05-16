@@ -1,0 +1,9 @@
+../BSP/i2c_port/i2c_port.c:8:27:i2c_port_get_handle	3
+../BSP/i2c_port/i2c_port.c:21:9:i2c_port_is_enabled	5
+../BSP/i2c_port/i2c_port.c:34:9:i2c_port_master_write	6
+../BSP/i2c_port/i2c_port.c:51:9:i2c_port_master_read	6
+../BSP/i2c_port/i2c_port.c:68:9:i2c_port_slave_write	6
+../BSP/i2c_port/i2c_port.c:84:9:i2c_port_start_slave_receive_it	5
+../BSP/i2c_port/i2c_port.c:95:9:i2c_port_start_slave_transmit_it	5
+../BSP/i2c_port/i2c_port.c:106:9:i2c_port_init	3
+../BSP/i2c_port/i2c_port.c:113:9:i2c_port_deinit	3

@@ -1,0 +1,4 @@
+../Device_Driver/stm32_uart_driver/stm32_uart_driver.c:7:21:stm32_uart_driver_get_handle	3
+../Device_Driver/stm32_uart_driver/stm32_uart_driver.c:20:9:stm32_uart_driver_write	5
+../Device_Driver/stm32_uart_driver/stm32_uart_driver.c:32:9:stm32_uart_driver_init	3
+../Device_Driver/stm32_uart_driver/stm32_uart_driver.c:39:9:stm32_uart_driver_deinit	3

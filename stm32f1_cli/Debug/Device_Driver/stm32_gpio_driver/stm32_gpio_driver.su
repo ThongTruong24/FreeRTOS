@@ -1,0 +1,2 @@
+../Device_Driver/stm32_gpio_driver/stm32_gpio_driver.c:4:6:stm32_gpio_driver_write	16	static
+../Device_Driver/stm32_gpio_driver/stm32_gpio_driver.c:9:6:stm32_gpio_driver_toggle	16	static

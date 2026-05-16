@@ -1,0 +1,10 @@
+../BSP/gpio_port/gpio_port.c:11:6:bsp_led_init	8	static
+../BSP/gpio_port/gpio_port.c:16:6:bsp_led_on	16	static
+../BSP/gpio_port/gpio_port.c:23:6:bsp_led_off	16	static
+../BSP/gpio_port/gpio_port.c:30:6:bsp_led_toggle	16	static
+../BSP/gpio_port/gpio_port.c:37:6:gpio_port_init	8	static
+../BSP/gpio_port/gpio_port.c:42:6:gpio_port_on	8	static
+../BSP/gpio_port/gpio_port.c:51:6:gpio_port_off	8	static
+../BSP/gpio_port/gpio_port.c:60:6:gpio_port_toggle	8	static
+../BSP/gpio_port/gpio_port.c:65:6:gpio_port_write	16	static
+../BSP/gpio_port/gpio_port.c:74:16:gpio_port_led_id_is_valid	16	static

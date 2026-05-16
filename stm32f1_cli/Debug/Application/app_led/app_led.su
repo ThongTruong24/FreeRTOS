@@ -1,0 +1,9 @@
+../Application/app_led/app_led.c:24:6:app_led_init	8	static
+../Application/app_led/app_led.c:37:6:app_led_on	16	static
+../Application/app_led/app_led.c:42:6:app_led_off	16	static
+../Application/app_led/app_led.c:47:6:app_led_toggle	16	static
+../Application/app_led/app_led.c:52:6:app_led_handle_message	24	static,ignoring_inline_asm
+../Application/app_led/app_led.c:71:6:app_led_task_entry	96	static
+../Application/app_led/app_led.c:88:17:hz_to_toggle_period_ms	24	static
+../Application/app_led/app_led.c:112:13:app_led_apply_control	16	static
+../Application/app_led/app_led.c:170:13:app_led_handle_tick	16	static

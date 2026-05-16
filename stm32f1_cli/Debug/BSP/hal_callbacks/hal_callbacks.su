@@ -1,0 +1,3 @@
+../BSP/hal_callbacks/hal_callbacks.c:14:6:hal_callbacks_init	8	static
+../BSP/hal_callbacks/hal_callbacks.c:20:6:HAL_UART_RxCpltCallback	16	static
+../BSP/hal_callbacks/hal_callbacks.c:39:6:HAL_UART_ErrorCallback	16	static

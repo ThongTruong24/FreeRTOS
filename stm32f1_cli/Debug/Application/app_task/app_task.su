@@ -1,0 +1,6 @@
+../Application/app_task/app_task.c:29:6:app_task_init	16	static,ignoring_inline_asm
+../Application/app_task/app_task.c:37:6:app_task_start	120	static,ignoring_inline_asm
+../Application/app_task/app_task.c:81:12:app_task_post	96	static,ignoring_inline_asm
+../Application/app_task/app_task.c:94:12:app_task_post_from_isr	96	static,ignoring_inline_asm
+../Application/app_task/app_task.c:110:13:app_main_task	88	static
+../Application/app_task/app_task.c:173:17:app_task_ticks_to_ms	40	static

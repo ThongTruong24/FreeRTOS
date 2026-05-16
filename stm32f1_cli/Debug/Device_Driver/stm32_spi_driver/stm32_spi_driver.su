@@ -1,0 +1,9 @@
+../Device_Driver/stm32_spi_driver/stm32_spi_driver.c:7:20:stm32_spi_driver_get_handle	16	static
+../Device_Driver/stm32_spi_driver/stm32_spi_driver.c:20:9:stm32_spi_driver_write	32	static
+../Device_Driver/stm32_spi_driver/stm32_spi_driver.c:35:9:stm32_spi_driver_read	32	static
+../Device_Driver/stm32_spi_driver/stm32_spi_driver.c:50:9:stm32_spi_driver_transfer	40	static
+../Device_Driver/stm32_spi_driver/stm32_spi_driver.c:65:9:stm32_spi_driver_is_slave	24	static
+../Device_Driver/stm32_spi_driver/stm32_spi_driver.c:72:9:stm32_spi_driver_start_slave_transfer_it	32	static
+../Device_Driver/stm32_spi_driver/stm32_spi_driver.c:84:9:stm32_spi_driver_abort_it	24	static
+../Device_Driver/stm32_spi_driver/stm32_spi_driver.c:91:9:stm32_spi_driver_init	24	static
+../Device_Driver/stm32_spi_driver/stm32_spi_driver.c:98:9:stm32_spi_driver_deinit	24	static

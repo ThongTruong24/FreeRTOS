@@ -1,0 +1,9 @@
+../Application/app_board_slave/app_board_slave.c:26:6:app_board_slave_init	2
+../Application/app_board_slave/app_board_slave.c:35:6:app_board_slave_rx_byte_from_isr	4
+../Application/app_board_slave/app_board_slave.c:55:6:app_board_slave_handle_message	4
+../Application/app_board_slave/app_board_slave.c:76:6:app_board_slave_task_entry	6
+../Application/app_board_slave/app_board_slave.c:111:16:app_board_slave_uart1_is_slave_link	3
+../Application/app_board_slave/app_board_slave.c:118:16:app_board_slave_send_led_control	4
+../Application/app_board_slave/app_board_slave.c:144:13:app_board_slave_encode_led_payload	1
+../Application/app_board_slave/app_board_slave.c:157:13:app_board_slave_decode_frame	3
+../Application/app_board_slave/app_board_slave.c:175:13:app_board_slave_decode_led_control	3

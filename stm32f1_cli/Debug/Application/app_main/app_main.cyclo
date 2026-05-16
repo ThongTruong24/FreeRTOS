@@ -1,0 +1,3 @@
+../Application/app_main/app_main.c:12:6:app_main_init	1
+../Application/app_main/app_main.c:21:6:app_main_start	1
+../Application/app_main/app_main.c:31:6:app_main	1

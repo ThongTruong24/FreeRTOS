@@ -1,0 +1,5 @@
+../BSP/uart_port/uart_port.c:8:28:uart_port_get_handle	3
+../BSP/uart_port/uart_port.c:21:9:uart_port_is_enabled	4
+../BSP/uart_port/uart_port.c:34:9:uart_port_write	6
+../BSP/uart_port/uart_port.c:46:9:uart_port_init	3
+../BSP/uart_port/uart_port.c:53:9:uart_port_deinit	3
