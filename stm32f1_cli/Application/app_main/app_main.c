@@ -5,15 +5,17 @@
 
 #include "app_board_slave.h"
 #include "app_debug.h"
+#include "app_gps.h"
 #include "app_led.h"
 #include "app_task.h"
-#include "param.h"
+#include "board_service.h"
 
 void app_main_init(void)
 {
-    param_init();
+    board_service_init();
     app_led_init();
     app_debug_init();
+    app_gps_init();
     app_board_slave_init();
     app_task_init();
 }

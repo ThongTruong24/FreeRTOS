@@ -24,16 +24,19 @@ C_DEPS :=
 SUBDIRS := \
 Application/app_board_slave \
 Application/app_debug \
+Application/app_gps \
 Application/app_led \
 Application/app_main \
 Application/app_task \
-Application/param \
 Application/protocol \
-BSP/board_config \
+BSP/board_devices \
+BSP/board_service \
 BSP/debug_port \
 BSP/gpio_port \
 BSP/hal_callbacks \
 BSP/i2c_port \
+BSP/rtos_port \
+BSP/slave_link_port \
 BSP/spi_port \
 BSP/uart_port \
 Core/Src \

@@ -1,3 +1,2 @@
-../BSP/debug_port/debug_port.c:7:6:bsp_debug_init	4	static
-../BSP/debug_port/debug_port.c:12:6:bsp_debug_write	16	static
-../BSP/debug_port/debug_port.c:17:9:console_port_write	24	static
+../BSP/debug_port/debug_port.c:3:6:bsp_debug_init	4	static
+../BSP/debug_port/debug_port.c:8:6:bsp_debug_write	16	static

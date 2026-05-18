@@ -1,7 +1,0 @@
-../Application/param/param.c:26:6:param_init	2
-../Application/param/param.c:35:9:param_find	5
-../Application/param/param.c:53:13:param_name	2
-../Application/param/param.c:62:9:param_get	2
-../Application/param/param.c:71:9:param_set	4
-../Application/param/param.c:85:9:param_set_by_name	2
-../Application/param/param.c:96:9:param_get_by_name	3

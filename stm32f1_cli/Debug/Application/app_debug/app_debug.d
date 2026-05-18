@@ -10,8 +10,8 @@ Application/app_debug/app_debug.o: ../Application/app_debug/app_debug.c \
  D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/stream_buffer.h \
  D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/task.h \
  D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/list.h \
- ../Application/app_task/app_task.h ../BSP/debug_port/debug_port.h \
- ../Application/param/param.h
+ ../Application/app_gps/app_gps.h ../Application/app_task/app_task.h \
+ ../BSP/board_service/board_service.h ../BSP/board_service/param.h
 ../Application/app_debug/app_debug.h:
 ../Application/message/message.h:
 D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/FreeRTOS.h:
@@ -24,6 +24,7 @@ D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/mpu_wrappers.
 D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/stream_buffer.h:
 D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/task.h:
 D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/list.h:
+../Application/app_gps/app_gps.h:
 ../Application/app_task/app_task.h:
-../BSP/debug_port/debug_port.h:
-../Application/param/param.h:
+../BSP/board_service/board_service.h:
+../BSP/board_service/param.h:

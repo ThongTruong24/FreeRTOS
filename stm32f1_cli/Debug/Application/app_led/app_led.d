@@ -9,8 +9,8 @@ Application/app_led/app_led.o: ../Application/app_led/app_led.c \
  D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/mpu_wrappers.h \
  D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/task.h \
  D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/list.h \
- ../Application/app_task/app_task.h ../BSP/gpio_port/gpio_port.h \
- ../Application/param/param.h
+ ../Application/app_task/app_task.h ../BSP/board_service/board_service.h \
+ ../BSP/board_service/param.h
 ../Application/app_led/app_led.h:
 ../Application/message/message.h:
 D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/FreeRTOS.h:
@@ -23,5 +23,5 @@ D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/mpu_wrappers.
 D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/task.h:
 D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/list.h:
 ../Application/app_task/app_task.h:
-../BSP/gpio_port/gpio_port.h:
-../Application/param/param.h:
+../BSP/board_service/board_service.h:
+../BSP/board_service/param.h:

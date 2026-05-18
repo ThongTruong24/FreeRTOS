@@ -1,8 +1,0 @@
-../Device_Driver/stm32_i2c_driver/stm32_i2c_driver.c:7:20:stm32_i2c_driver_get_handle	3
-../Device_Driver/stm32_i2c_driver/stm32_i2c_driver.c:20:9:stm32_i2c_driver_master_write	5
-../Device_Driver/stm32_i2c_driver/stm32_i2c_driver.c:34:9:stm32_i2c_driver_master_read	5
-../Device_Driver/stm32_i2c_driver/stm32_i2c_driver.c:47:9:stm32_i2c_driver_slave_write	5
-../Device_Driver/stm32_i2c_driver/stm32_i2c_driver.c:59:9:stm32_i2c_driver_start_slave_receive_it	5
-../Device_Driver/stm32_i2c_driver/stm32_i2c_driver.c:70:9:stm32_i2c_driver_start_slave_transmit_it	5
-../Device_Driver/stm32_i2c_driver/stm32_i2c_driver.c:81:9:stm32_i2c_driver_init	3
-../Device_Driver/stm32_i2c_driver/stm32_i2c_driver.c:88:9:stm32_i2c_driver_deinit	3

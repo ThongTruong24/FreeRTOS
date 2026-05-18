@@ -1,5 +1,7 @@
-../BSP/uart_port/uart_port.c:8:28:uart_port_get_handle	3
-../BSP/uart_port/uart_port.c:21:9:uart_port_is_enabled	4
-../BSP/uart_port/uart_port.c:34:9:uart_port_write	6
-../BSP/uart_port/uart_port.c:46:9:uart_port_init	3
-../BSP/uart_port/uart_port.c:53:9:uart_port_deinit	3
+../BSP/uart_port/uart_port.c:5:28:uart_port_get_handle	1
+../BSP/uart_port/uart_port.c:10:9:uart_port_is_enabled	1
+../BSP/uart_port/uart_port.c:15:9:uart_port_write	6
+../BSP/uart_port/uart_port.c:27:9:uart_port_start_receive_it	6
+../BSP/uart_port/uart_port.c:39:9:uart_port_instance_from_handle	1
+../BSP/uart_port/uart_port.c:44:9:uart_port_init	3
+../BSP/uart_port/uart_port.c:51:9:uart_port_deinit	3

@@ -1,3 +1,4 @@
-../BSP/hal_callbacks/hal_callbacks.c:14:6:hal_callbacks_init	1
-../BSP/hal_callbacks/hal_callbacks.c:20:6:HAL_UART_RxCpltCallback	4
-../BSP/hal_callbacks/hal_callbacks.c:39:6:HAL_UART_ErrorCallback	4
+../BSP/hal_callbacks/hal_callbacks.c:18:6:hal_callbacks_init	3
+../BSP/hal_callbacks/hal_callbacks.c:35:6:HAL_UART_RxCpltCallback	6
+../BSP/hal_callbacks/hal_callbacks.c:71:6:HAL_UART_ErrorCallback	3
+../BSP/hal_callbacks/hal_callbacks.c:90:17:hal_callbacks_uart_rx_byte_buffer	4

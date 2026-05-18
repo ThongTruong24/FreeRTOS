@@ -1,4 +1,0 @@
-../Device_Driver/stm32_uart_driver/stm32_uart_driver.c:7:21:stm32_uart_driver_get_handle	16	static
-../Device_Driver/stm32_uart_driver/stm32_uart_driver.c:20:9:stm32_uart_driver_write	32	static
-../Device_Driver/stm32_uart_driver/stm32_uart_driver.c:32:9:stm32_uart_driver_init	24	static
-../Device_Driver/stm32_uart_driver/stm32_uart_driver.c:39:9:stm32_uart_driver_deinit	24	static

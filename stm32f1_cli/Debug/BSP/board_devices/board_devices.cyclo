@@ -1,0 +1,2 @@
+../BSP/board_devices/board_devices.c:27:21:board_devices_get_uart	3
+../BSP/board_devices/board_devices.c:88:9:board_devices_uart_instance_from_handle	3

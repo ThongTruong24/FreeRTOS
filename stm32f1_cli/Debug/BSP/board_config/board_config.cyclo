@@ -1,5 +1,0 @@
-../BSP/board_config/board_config.c:7:16:apply_uart	4
-../BSP/board_config/board_config.c:19:16:apply_spi	2
-../BSP/board_config/board_config.c:26:16:apply_i2c	2
-../BSP/board_config/board_config.c:33:9:board_config_apply	16
-../BSP/board_config/board_config.c:69:13:board_config_bus_name	5

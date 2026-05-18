@@ -1,0 +1,2 @@
+../BSP/rtos_port/rtos_port.c:13:6:rtos_port_on_systick	2
+../BSP/rtos_port/rtos_port.c:21:6:vApplicationStackOverflowHook	2

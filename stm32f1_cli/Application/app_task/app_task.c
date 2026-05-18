@@ -5,21 +5,22 @@
 
 #include "app_board_slave.h"
 #include "app_debug.h"
+#include "app_gps.h"
 #include "app_led.h"
-#include "board_config.h"
-#include "param.h"
 
-#define APP_QUEUE_LENGTH            16U
+#define APP_QUEUE_LENGTH                   16U
 
-#define APP_MAIN_TASK_STACK_DEPTH   configMINIMAL_STACK_SIZE
-#define APP_LED_TASK_STACK_DEPTH    configMINIMAL_STACK_SIZE
-#define APP_DEBUG_TASK_STACK_DEPTH  (configMINIMAL_STACK_SIZE * 2U)
+#define APP_MAIN_TASK_STACK_DEPTH          configMINIMAL_STACK_SIZE
+#define APP_LED_TASK_STACK_DEPTH           configMINIMAL_STACK_SIZE
+#define APP_DEBUG_TASK_STACK_DEPTH         (configMINIMAL_STACK_SIZE * 2U)
+#define APP_GPS_TASK_STACK_DEPTH           configMINIMAL_STACK_SIZE
 #define APP_BOARD_SLAVE_TASK_STACK_DEPTH   configMINIMAL_STACK_SIZE
 
-#define APP_MAIN_TASK_PRIORITY      2U
-#define APP_LED_TASK_PRIORITY       1U
-#define APP_DEBUG_TASK_PRIORITY     1U
-#define APP_BOARD_SLAVE_TASK_PRIORITY      1U
+#define APP_MAIN_TASK_PRIORITY             3U
+#define APP_BOARD_SLAVE_TASK_PRIORITY      2U
+#define APP_GPS_TASK_PRIORITY              2U
+#define APP_LED_TASK_PRIORITY              1U
+#define APP_DEBUG_TASK_PRIORITY            1U
 
 static QueueHandle_t s_app_queue = NULL;
 
@@ -62,6 +63,14 @@ void app_task_start(void)
                          APP_DEBUG_TASK_STACK_DEPTH,
                          NULL,
                          APP_DEBUG_TASK_PRIORITY,
+                         NULL);
+    configASSERT(status == pdPASS);
+
+    status = xTaskCreate(app_gps_task_entry,
+                         "app_gps",
+                         APP_GPS_TASK_STACK_DEPTH,
+                         NULL,
+                         APP_GPS_TASK_PRIORITY,
                          NULL);
     configASSERT(status == pdPASS);
 
@@ -120,36 +129,16 @@ static void app_main_task(void *argument)
             switch (msg.id)
             {
                 case APP_MSG_LED_CONTROL:
-                    app_led_handle_message(&msg);
-                    break;
-
                 case APP_MSG_LED_TICK:
                     app_led_handle_message(&msg);
                     break;
 
                 case APP_MSG_BOARD_SLAVE_LED_CONTROL:
+                case APP_MSG_BOARD_SLAVE_LED_REQUEST:
                     app_board_slave_handle_message(&msg);
                     break;
 
-                case APP_MSG_BOARD_CONFIG:
-                    (void)board_config_apply(&msg.payload.board_config);
-                    break;
-
-                case APP_MSG_PARAM_UPDATE:
-                    if (param_set_by_name(msg.payload.param_update.name,
-                                          msg.payload.param_update.value) != 0U)
-                    {
-                        app_debug_print("ok\r\n");
-                    }
-                    else
-                    {
-                        app_debug_print("err: param set failed\r\n");
-                    }
-                    break;
-
-                case APP_MSG_DEBUG_PRINT:
-                case APP_MSG_DEBUG_UART_RX_FRAME:
-                case APP_MSG_DEBUG_ERROR:
+                case APP_MSG_LED_STATUS:
                     app_debug_handle_message(&msg);
                     break;
 

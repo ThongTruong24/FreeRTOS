@@ -12,9 +12,9 @@ Application/app_board_slave/app_board_slave.o: \
  D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/stream_buffer.h \
  D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/task.h \
  D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/list.h \
- ../Application/app_debug/app_debug.h ../Application/app_task/app_task.h \
- ../Application/param/param.h ../Application/protocol/protocol.h \
- ../BSP/uart_port/uart_port.h
+ ../Application/app_debug/app_debug.h ../Application/app_led/app_led.h \
+ ../Application/app_task/app_task.h ../BSP/board_service/board_service.h \
+ ../Application/protocol/protocol.h
 ../Application/app_board_slave/app_board_slave.h:
 ../Application/message/message.h:
 D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/FreeRTOS.h:
@@ -28,7 +28,7 @@ D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/stream_buffer
 D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/task.h:
 D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/list.h:
 ../Application/app_debug/app_debug.h:
+../Application/app_led/app_led.h:
 ../Application/app_task/app_task.h:
-../Application/param/param.h:
+../BSP/board_service/board_service.h:
 ../Application/protocol/protocol.h:
-../BSP/uart_port/uart_port.h:

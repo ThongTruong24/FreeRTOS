@@ -1,21 +1,19 @@
 #include "app_debug.h"
 
-#include <limits.h>
 #include <stdint.h>
-#include <string.h>
 
 #include "FreeRTOS.h"
 #include "stream_buffer.h"
 #include "task.h"
 
+#include "app_gps.h"
 #include "app_task.h"
-#include "debug_port.h"
+#include "board_service.h"
 #include "param.h"
 
 #define APP_DEBUG_RX_BUFFER_SIZE       128U
 #define APP_DEBUG_COMMAND_MAX_LEN      80U
 #define APP_DEBUG_ARG_MAX_COUNT        8U
-#define APP_DEBUG_WRITE_TIMEOUT_MS     50U
 
 static StreamBufferHandle_t s_rx_stream;
 static char s_command[APP_DEBUG_COMMAND_MAX_LEN];
@@ -24,8 +22,20 @@ static uint8_t s_rx_overflow;
 
 static void app_debug_process_rx(void);
 static void app_debug_execute_command(char *command);
+static int app_debug_split_args(char *command, char **argv, int argv_max);
 static void app_debug_handle_led_command(int argc, char **argv);
 static void app_debug_handle_param_command(int argc, char **argv);
+static void app_debug_handle_gps_command(int argc, char **argv);
+static void app_debug_print_command_list(void);
+static void app_debug_print_led_usage(void);
+static void app_debug_print_board_slave_led_usage(void);
+static uint8_t app_debug_parse_local_led_command(int argc,
+                                                 char **argv,
+                                                 app_led_control_msg_t *control);
+static uint8_t app_debug_parse_board_slave_led_command(
+    int argc,
+    char **argv,
+    app_led_control_msg_t *control);
 static uint8_t app_debug_parse_led_action(const char *token, uint8_t *command);
 static uint8_t app_debug_parse_led_blink(int argc,
                                          char **argv,
@@ -35,23 +45,25 @@ static uint8_t app_debug_parse_led_blink_hz(int argc,
                                             char **argv,
                                             int start_index,
                                             app_led_control_msg_t *control);
-static uint8_t app_debug_parse_i32(const char *token, int32_t *value);
 static uint8_t app_debug_parse_u16(const char *token, uint16_t *value);
 static uint8_t app_debug_parse_u32_limit(const char *token,
                                          uint32_t max_value,
                                          uint32_t *value);
 static uint8_t app_debug_ascii_to_nibble(char c, uint8_t *value);
 static uint8_t app_debug_streq(const char *a, const char *b);
-static void app_debug_post_local_led_control(const app_led_control_msg_t *control);
-static void app_debug_post_board_slave_led_control(
-    const app_led_control_msg_t *control);
+static uint16_t app_debug_text_len(const char *text);
+static void app_debug_post_led_control(app_msg_id_t id,
+                                       const app_led_control_msg_t *control);
+static void app_debug_post_board_slave_led_request(void);
 static void app_debug_print_param_table(void);
+static void app_debug_print_gps_snapshot(void);
+static void app_debug_print_text_or_dash(const char *text);
 static void app_debug_write_i32(int32_t value);
 static void app_debug_write_u32(uint32_t value);
 
 void app_debug_init(void)
 {
-    bsp_debug_init();
+    board_service_console_init();
     s_command_len = 0U;
     s_rx_overflow = 0U;
     s_rx_stream = xStreamBufferCreate(APP_DEBUG_RX_BUFFER_SIZE, 1U);
@@ -60,21 +72,18 @@ void app_debug_init(void)
 
 void app_debug_print(const char *text)
 {
-    uint16_t len = 0U;
+    uint16_t len;
 
     if (text == NULL)
     {
         return;
     }
 
-    while ((text[len] != '\0') && (len < UINT16_MAX))
-    {
-        len++;
-    }
+    len = app_debug_text_len(text);
 
     if (len > 0U)
     {
-        bsp_debug_write((const uint8_t *)text, len);
+        board_service_console_write((const uint8_t *)text, len);
     }
 }
 
@@ -95,28 +104,21 @@ void app_debug_rx_byte_from_isr(uint8_t byte)
 
 void app_debug_handle_message(const app_msg_t *msg)
 {
-    uint16_t write_len;
-
     configASSERT(msg != NULL);
 
     switch (msg->id)
     {
-        case APP_MSG_DEBUG_PRINT:
-        case APP_MSG_DEBUG_UART_RX_FRAME:
-            write_len = msg->len;
-            if (write_len > APP_DEBUG_DATA_MAX_LEN)
-            {
-                write_len = APP_DEBUG_DATA_MAX_LEN;
-            }
-
-            if (write_len > 0U)
-            {
-                bsp_debug_write(msg->payload.debug.data, write_len);
-            }
-            break;
-
-        case APP_MSG_DEBUG_ERROR:
-            app_debug_print("debug error\r\n");
+        case APP_MSG_LED_STATUS:
+            app_debug_print("led board slave status: ");
+            app_debug_print((msg->payload.led_status.state == LED_STATE_ON) ?
+                            "on" : "off");
+            app_debug_print(" blinking=");
+            app_debug_write_u32(msg->payload.led_status.blinking);
+            app_debug_print(" hz=");
+            app_debug_write_u32(msg->payload.led_status.hz);
+            app_debug_print(" remaining=");
+            app_debug_write_u32(msg->payload.led_status.remaining_count);
+            app_debug_print("\r\n");
             break;
 
         default:
@@ -184,16 +186,7 @@ static void app_debug_process_rx(void)
 static void app_debug_execute_command(char *command)
 {
     char *argv[APP_DEBUG_ARG_MAX_COUNT];
-    int argc = 0;
-    char *token;
-
-    token = strtok(command, " \t");
-
-    while ((token != NULL) && (argc < APP_DEBUG_ARG_MAX_COUNT))
-    {
-        argv[argc++] = token;
-        token = strtok(NULL, " \t");
-    }
+    int argc = app_debug_split_args(command, argv, APP_DEBUG_ARG_MAX_COUNT);
 
     if (argc == 0)
     {
@@ -204,14 +197,56 @@ static void app_debug_execute_command(char *command)
     {
         app_debug_handle_led_command(argc, argv);
     }
+    else if ((argc == 1) && (app_debug_streq(argv[0], "show") != 0U))
+    {
+        app_debug_print_command_list();
+    }
     else if (app_debug_streq(argv[0], "param") != 0U)
     {
         app_debug_handle_param_command(argc, argv);
+    }
+    else if (app_debug_streq(argv[0], "BN-220") != 0U)
+    {
+        app_debug_handle_gps_command(argc, argv);
     }
     else
     {
         app_debug_print("err: unknown command\r\n");
     }
+}
+
+static int app_debug_split_args(char *command, char **argv, int argv_max)
+{
+    int argc = 0;
+    uint8_t in_token = 0U;
+
+    if ((command == NULL) || (argv == NULL) || (argv_max <= 0))
+    {
+        return 0;
+    }
+
+    while (*command != '\0')
+    {
+        if ((*command == ' ') || (*command == '\t'))
+        {
+            *command = '\0';
+            in_token = 0U;
+        }
+        else if (in_token == 0U)
+        {
+            if (argc >= argv_max)
+            {
+                return argc;
+            }
+
+            argv[argc++] = command;
+            in_token = 1U;
+        }
+
+        command++;
+    }
+
+    return argc;
 }
 
 static void app_debug_handle_led_command(int argc, char **argv)
@@ -222,94 +257,140 @@ static void app_debug_handle_led_command(int argc, char **argv)
 
     if (argc < 2)
     {
-        app_debug_print("usage: led on|off|toggle;\r\n");
-        app_debug_print("       led blink <hz> <count>;\r\n");
-        app_debug_print("       led board slave on|off|toggle;\r\n");
-        app_debug_print("       led board slave blink <hz>;\r\n");
+        app_debug_print_led_usage();
         return;
     }
 
     if (app_debug_streq(argv[1], "board") != 0U)
     {
-        if ((argc < 4) || (app_debug_streq(argv[2], "slave") == 0U))
+        if ((argc == 4) &&
+            (app_debug_streq(argv[2], "slave") != 0U) &&
+            (app_debug_streq(argv[3], "request") != 0U))
         {
-            app_debug_print("usage: led board slave on|off|toggle;\r\n");
-            app_debug_print("       led board slave blink <hz>;\r\n");
+            app_debug_post_board_slave_led_request();
             return;
         }
 
-        if (app_debug_streq(argv[3], "blink") != 0U)
+        if (app_debug_parse_board_slave_led_command(argc, argv, &control) == 0U)
         {
-            if (app_debug_parse_led_blink_hz(argc, argv, 3, &control) == 0U)
-            {
-                app_debug_print("usage: led board slave blink <hz>;\r\n");
-                return;
-            }
-        }
-        else if ((argc != 4) ||
-                 (app_debug_parse_led_action(argv[3], &control.command) == 0U))
-        {
-            app_debug_print("err: expected on|off|toggle|blink\r\n");
             return;
         }
 
-        app_debug_post_board_slave_led_control(&control);
+        app_debug_post_led_control(APP_MSG_BOARD_SLAVE_LED_CONTROL, &control);
         return;
     }
 
-    if (app_debug_streq(argv[1], "blink") != 0U)
+    if (app_debug_parse_local_led_command(argc, argv, &control) == 0U)
     {
-        if (app_debug_parse_led_blink(argc, argv, 1, &control) == 0U)
-        {
-            app_debug_print("usage: led blink <hz> <count>;\r\n");
-            return;
-        }
-    }
-    else if (app_debug_parse_led_action(argv[1], &control.command) == 0U)
-    {
-        app_debug_print("err: expected on|off|toggle|blink\r\n");
         return;
     }
 
-    app_debug_post_local_led_control(&control);
+    app_debug_post_led_control(APP_MSG_LED_CONTROL, &control);
     app_debug_print("ok\r\n");
 }
 
 static void app_debug_handle_param_command(int argc, char **argv)
 {
-    app_msg_t msg = {0};
-    int32_t value;
-    param_id_t id;
-
     if ((argc == 2) && (app_debug_streq(argv[1], "show") != 0U))
     {
         app_debug_print_param_table();
         return;
     }
 
-    if ((argc != 4) || (app_debug_streq(argv[1], "set") == 0U))
+    app_debug_print("usage: param show;\r\n");
+}
+
+static void app_debug_handle_gps_command(int argc, char **argv)
+{
+    if ((argc == 2) && (app_debug_streq(argv[1], "GPS") != 0U))
     {
-        app_debug_print("usage: param set <name> <value>;\r\n");
-        app_debug_print("       param show;\r\n");
+        app_debug_print_gps_snapshot();
         return;
     }
 
-    if ((strlen(argv[2]) >= APP_PARAM_NAME_MAX_LEN) ||
-        (param_find(argv[2], &id) == 0U) ||
-        (app_debug_parse_i32(argv[3], &value) == 0U))
+    app_debug_print("usage: BN-220 GPS;\r\n");
+}
+
+static void app_debug_print_command_list(void)
+{
+    app_debug_print(
+        "commands:\r\n"
+        "  show;\r\n"
+        "  param show;\r\n"
+        "  BN-220 GPS;\r\n"
+        "  led on|off|toggle;\r\n"
+        "  led blink <hz> <count>;\r\n"
+        "  led board slave on|off|toggle;\r\n"
+        "  led board slave blink <hz> [count];\r\n"
+        "  led board slave request;\r\n");
+}
+
+static void app_debug_print_led_usage(void)
+{
+    app_debug_print(
+        "usage: led on|off|toggle;\r\n"
+        "       led blink <hz> <count>;\r\n"
+        "       led board slave on|off|toggle;\r\n"
+        "       led board slave blink <hz> [count];\r\n"
+        "       led board slave request;\r\n");
+}
+
+static void app_debug_print_board_slave_led_usage(void)
+{
+    app_debug_print(
+        "usage: led board slave on|off|toggle;\r\n"
+        "       led board slave blink <hz> [count];\r\n"
+        "       led board slave request;\r\n");
+}
+
+static uint8_t app_debug_parse_local_led_command(int argc,
+                                                 char **argv,
+                                                 app_led_control_msg_t *control)
+{
+    if (app_debug_streq(argv[1], "blink") != 0U)
     {
-        app_debug_print("err: bad param command\r\n");
-        return;
+        if (app_debug_parse_led_blink(argc, argv, 1, control) == 0U)
+        {
+            app_debug_print("usage: led blink <hz> <count>;\r\n");
+            return 0U;
+        }
+    }
+    else if (app_debug_parse_led_action(argv[1], &control->command) == 0U)
+    {
+        app_debug_print("err: expected on|off|toggle|blink\r\n");
+        return 0U;
     }
 
-    msg.id = APP_MSG_PARAM_UPDATE;
-    msg.len = sizeof(msg.payload.param_update);
-    (void)strncpy(msg.payload.param_update.name,
-                  argv[2],
-                  sizeof(msg.payload.param_update.name) - 1U);
-    msg.payload.param_update.value = value;
-    (void)app_task_post(&msg, 0U);
-    (void)id;
+    return 1U;
+}
+
+static uint8_t app_debug_parse_board_slave_led_command(
+    int argc,
+    char **argv,
+    app_led_control_msg_t *control)
+{
+    if ((argc < 4) || (app_debug_streq(argv[2], "slave") == 0U))
+    {
+        app_debug_print_board_slave_led_usage();
+        return 0U;
+    }
+
+    if (app_debug_streq(argv[3], "blink") != 0U)
+    {
+        if (app_debug_parse_led_blink_hz(argc, argv, 3, control) == 0U)
+        {
+            app_debug_print("usage: led board slave blink <hz> [count];\r\n");
+            return 0U;
+        }
+    }
+    else if ((argc != 4) ||
+             (app_debug_parse_led_action(argv[3], &control->command) == 0U))
+    {
+        app_debug_print("err: expected on|off|toggle|blink\r\n");
+        return 0U;
+    }
+
+    return 1U;
 }
 
 static uint8_t app_debug_parse_led_action(const char *token, uint8_t *command)
@@ -366,7 +447,8 @@ static uint8_t app_debug_parse_led_blink_hz(int argc,
                                             int start_index,
                                             app_led_control_msg_t *control)
 {
-    if ((control == NULL) || (argc != (start_index + 2)))
+    if ((control == NULL) ||
+        ((argc != (start_index + 2)) && (argc != (start_index + 3))))
     {
         return 0U;
     }
@@ -374,39 +456,14 @@ static uint8_t app_debug_parse_led_blink_hz(int argc,
     control->command = LED_CMD_BLINK_HZ_COUNT;
     control->count = 0U;
 
-    return app_debug_parse_u16(argv[start_index + 1], &control->hz);
-}
-
-static uint8_t app_debug_parse_i32(const char *token, int32_t *value)
-{
-    uint32_t parsed;
-    uint8_t negative = 0U;
-    uint32_t limit = INT32_MAX;
-
-    if ((token == NULL) || (value == NULL))
+    if (app_debug_parse_u16(argv[start_index + 1], &control->hz) == 0U)
     {
         return 0U;
     }
 
-    if (*token == '-')
+    if (argc == (start_index + 3))
     {
-        negative = 1U;
-        token++;
-        limit = 2147483648UL;
-    }
-
-    if (app_debug_parse_u32_limit(token, limit, &parsed) == 0U)
-    {
-        return 0U;
-    }
-
-    if (negative != 0U)
-    {
-        *value = (parsed == 2147483648UL) ? INT32_MIN : -(int32_t)parsed;
-    }
-    else
-    {
-        *value = (int32_t)parsed;
+        return app_debug_parse_u16(argv[start_index + 2], &control->count);
     }
 
     return 1U;
@@ -506,27 +563,48 @@ static uint8_t app_debug_ascii_to_nibble(char c, uint8_t *value)
 
 static uint8_t app_debug_streq(const char *a, const char *b)
 {
-    return (uint8_t)(strcmp(a, b) == 0);
+    if ((a == NULL) || (b == NULL))
+    {
+        return 0U;
+    }
+
+    while ((*a != '\0') && (*a == *b))
+    {
+        a++;
+        b++;
+    }
+
+    return (uint8_t)(*a == *b);
 }
 
-static void app_debug_post_local_led_control(const app_led_control_msg_t *control)
+static uint16_t app_debug_text_len(const char *text)
+{
+    uint16_t len = 0U;
+
+    while ((len < UINT16_MAX) && (text[len] != '\0'))
+    {
+        len++;
+    }
+
+    return len;
+}
+
+static void app_debug_post_led_control(app_msg_id_t id,
+                                       const app_led_control_msg_t *control)
 {
     app_msg_t msg = {0};
 
-    msg.id = APP_MSG_LED_CONTROL;
+    msg.id = id;
     msg.len = sizeof(msg.payload.led_control);
     msg.payload.led_control = *control;
     (void)app_task_post(&msg, 0U);
 }
 
-static void app_debug_post_board_slave_led_control(
-    const app_led_control_msg_t *control)
+static void app_debug_post_board_slave_led_request(void)
 {
     app_msg_t msg = {0};
 
-    msg.id = APP_MSG_BOARD_SLAVE_LED_CONTROL;
-    msg.len = sizeof(msg.payload.led_control);
-    msg.payload.led_control = *control;
+    msg.id = APP_MSG_BOARD_SLAVE_LED_REQUEST;
     (void)app_task_post(&msg, 0U);
 }
 
@@ -541,6 +619,105 @@ static void app_debug_print_param_table(void)
         app_debug_write_i32(param_get(id));
         app_debug_print("\r\n");
     }
+}
+
+static void app_debug_print_gps_snapshot(void)
+{
+    app_gps_snapshot_t snapshot;
+
+    app_gps_get_snapshot(&snapshot);
+
+    app_debug_print("BN-220 GPS\r\n");
+    app_debug_print("  data=");
+    app_debug_print((snapshot.has_data != 0U) ? "yes" : "no");
+    app_debug_print("\r\n");
+
+    app_debug_print("  valid=");
+    app_debug_print((snapshot.navigation_valid != 0U) ? "yes" : "no");
+    app_debug_print("\r\n");
+
+    app_debug_print("  utc_time=");
+    app_debug_print_text_or_dash(snapshot.utc_time);
+    app_debug_print("\r\n");
+
+    app_debug_print("  utc_date=");
+    app_debug_print_text_or_dash(snapshot.utc_date);
+    app_debug_print("\r\n");
+
+    app_debug_print("  latitude=");
+    app_debug_print_text_or_dash(snapshot.latitude);
+    app_debug_print("\r\n");
+
+    app_debug_print("  latitude_hemi=");
+    app_debug_print_text_or_dash(snapshot.latitude_hemi);
+    app_debug_print("\r\n");
+
+    app_debug_print("  longitude=");
+    app_debug_print_text_or_dash(snapshot.longitude);
+    app_debug_print("\r\n");
+
+    app_debug_print("  longitude_hemi=");
+    app_debug_print_text_or_dash(snapshot.longitude_hemi);
+    app_debug_print("\r\n");
+
+    app_debug_print("  speed_knots=");
+    app_debug_print_text_or_dash(snapshot.speed_knots);
+    app_debug_print("\r\n");
+
+    app_debug_print("  course_deg=");
+    app_debug_print_text_or_dash(snapshot.course_deg);
+    app_debug_print("\r\n");
+
+    app_debug_print("  altitude_m=");
+    app_debug_print_text_or_dash(snapshot.altitude_m);
+    app_debug_print("\r\n");
+
+    app_debug_print("  fix_quality=");
+    app_debug_print_text_or_dash(snapshot.fix_quality);
+    app_debug_print("\r\n");
+
+    app_debug_print("  fix_type=");
+    app_debug_print_text_or_dash(snapshot.fix_type);
+    app_debug_print("\r\n");
+
+    app_debug_print("  sats_used=");
+    app_debug_print_text_or_dash(snapshot.satellites_used);
+    app_debug_print("\r\n");
+
+    app_debug_print("  sats_view=");
+    app_debug_print_text_or_dash(snapshot.satellites_in_view);
+    app_debug_print("\r\n");
+
+    app_debug_print("  pdop=");
+    app_debug_print_text_or_dash(snapshot.pdop);
+    app_debug_print("\r\n");
+
+    app_debug_print("  hdop=");
+    app_debug_print_text_or_dash(snapshot.hdop);
+    app_debug_print("\r\n");
+
+    app_debug_print("  vdop=");
+    app_debug_print_text_or_dash(snapshot.vdop);
+    app_debug_print("\r\n");
+
+    app_debug_print("  sentences_ok=");
+    app_debug_write_u32(snapshot.valid_sentence_count);
+    app_debug_print("\r\n");
+
+    app_debug_print("  checksum_err=");
+    app_debug_write_u32(snapshot.checksum_error_count);
+    app_debug_print("\r\n");
+}
+
+static void app_debug_print_text_or_dash(const char *text)
+{
+    if ((text == NULL) || (text[0] == '\0'))
+    {
+        app_debug_print("--");
+        return;
+    }
+
+    app_debug_print(text);
 }
 
 static void app_debug_write_i32(int32_t value)
@@ -574,8 +751,6 @@ static void app_debug_write_u32(uint32_t value)
     while (pos > 0U)
     {
         pos--;
-        (void)console_port_write((const uint8_t *)&text[pos],
-                                 1U,
-                                 APP_DEBUG_WRITE_TIMEOUT_MS);
+        board_service_console_write((const uint8_t *)&text[pos], 1U);
     }
 }
