@@ -1,6 +1,6 @@
-../Application/app_task/app_task.c:30:6:app_task_init	16	static,ignoring_inline_asm
-../Application/app_task/app_task.c:38:6:app_task_start	64	static,ignoring_inline_asm
-../Application/app_task/app_task.c:90:12:app_task_post	48	static,ignoring_inline_asm
-../Application/app_task/app_task.c:103:12:app_task_post_from_isr	48	static,ignoring_inline_asm
-../Application/app_task/app_task.c:119:13:app_main_task	32	static
-../Application/app_task/app_task.c:162:17:app_task_ticks_to_ms	40	static
+../Application/app_task/app_task.c:31:6:app_task_init	16	static,ignoring_inline_asm
+../Application/app_task/app_task.c:39:6:app_task_start	72	static,ignoring_inline_asm
+../Application/app_task/app_task.c:91:12:app_task_post	56	static,ignoring_inline_asm
+../Application/app_task/app_task.c:104:12:app_task_post_from_isr	56	static,ignoring_inline_asm
+../Application/app_task/app_task.c:120:13:app_main_task	40	static
+../Application/app_task/app_task.c:168:17:app_task_ticks_to_ms	40	static

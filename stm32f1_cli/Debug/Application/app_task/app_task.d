@@ -13,6 +13,7 @@ Application/app_task/app_task.o: ../Application/app_task/app_task.c \
  D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/list.h \
  D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/task.h \
  ../Application/app_board_slave/app_board_slave.h \
+ ../Application/app_can_debug/app_can_debug.h \
  ../Application/app_debug/app_debug.h ../Application/app_gps/app_gps.h \
  ../Application/app_led/app_led.h
 ../Application/app_task/app_task.h:
@@ -29,6 +30,7 @@ D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/task.h:
 D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/list.h:
 D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/task.h:
 ../Application/app_board_slave/app_board_slave.h:
+../Application/app_can_debug/app_can_debug.h:
 ../Application/app_debug/app_debug.h:
 ../Application/app_gps/app_gps.h:
 ../Application/app_led/app_led.h:

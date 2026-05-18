@@ -1,0 +1,8 @@
+../BSP/can_port/can_port.c:7:9:can_port_is_enabled	3
+../BSP/can_port/can_port.c:18:9:can_port_start	5
+../BSP/can_port/can_port.c:44:9:can_port_stop	3
+../BSP/can_port/can_port.c:56:9:can_port_write_std	8
+../BSP/can_port/can_port.c:95:9:can_port_tx_mailboxes_are_full	3
+../BSP/can_port/can_port.c:108:10:can_port_take_error	3
+../BSP/can_port/can_port.c:134:9:can_port_instance_from_handle	1
+../BSP/can_port/can_port.c:140:23:can_port_protocol	3

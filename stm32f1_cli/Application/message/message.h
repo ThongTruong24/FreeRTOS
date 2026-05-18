@@ -23,6 +23,8 @@ typedef enum
     APP_MSG_LED_TICK,
     APP_MSG_BOARD_SLAVE_LED_CONTROL,
     APP_MSG_BOARD_SLAVE_LED_REQUEST,
+    APP_MSG_CAN_DEBUG_TX,
+    APP_MSG_CAN_STATUS,
 
     APP_MSG_NONE = 0xFE,
     APP_MSG_MAX = 0xFF
@@ -67,6 +69,31 @@ typedef struct
 
 #define APP_LED_STATUS_MSG_SIZE 8U
 
+typedef enum
+{
+    CAN_STATUS_STARTED = 0,
+    CAN_STATUS_TX_QUEUED,
+    CAN_STATUS_TX_COMPLETE,
+    CAN_STATUS_TX_MAILBOX_FULL,
+    CAN_STATUS_TX_ABORTED,
+    CAN_STATUS_ERROR
+} app_can_status_event_t;
+
+typedef struct
+{
+    uint16_t std_id;
+    uint8_t len;
+    uint8_t data[8];
+} app_can_frame_msg_t;
+
+typedef struct
+{
+    uint8_t instance;
+    uint8_t event;
+    uint16_t reserved;
+    uint32_t error_code;
+} app_can_status_msg_t;
+
 typedef struct
 {
     app_msg_id_t id;
@@ -77,6 +104,8 @@ typedef struct
     {
         app_led_control_msg_t led_control;
         app_led_status_msg_t led_status;
+        app_can_frame_msg_t can_frame;
+        app_can_status_msg_t can_status;
     } payload;
 } app_msg_t;
 

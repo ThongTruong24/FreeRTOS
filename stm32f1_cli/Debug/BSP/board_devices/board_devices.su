@@ -1,2 +1,4 @@
-../BSP/board_devices/board_devices.c:27:21:board_devices_get_uart	16	static
-../BSP/board_devices/board_devices.c:88:9:board_devices_uart_instance_from_handle	16	static
+../BSP/board_devices/board_devices.c:39:21:board_devices_get_uart	16	static
+../BSP/board_devices/board_devices.c:101:20:board_devices_get_can	16	static
+../BSP/board_devices/board_devices.c:121:9:board_devices_uart_instance_from_handle	16	static
+../BSP/board_devices/board_devices.c:183:9:board_devices_can_instance_from_handle	16	static

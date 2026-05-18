@@ -1,6 +1,7 @@
 #include "board_service.h"
 
 #include "board_devices.h"
+#include "can_port.h"
 #include "gpio_port.h"
 #include "i2c_port.h"
 #include "param.h"
@@ -50,6 +51,9 @@ static uint8_t board_service_transport_write(board_service_transport_t transport
                                              uint32_t timeout_ms);
 static uart_protocol_t board_service_uart_protocol(uint8_t instance);
 static uint8_t board_service_find_uart_protocol(uart_protocol_t protocol);
+static can_protocol_t board_service_can_protocol(uint8_t instance);
+static uint8_t board_service_find_can_protocol(can_protocol_t protocol);
+static uint32_t board_service_can_error_from_hal(uint32_t hal_error);
 static uint8_t board_service_status_led_id_is_valid(uint8_t led_id);
 static GPIO_PinState board_service_status_led_on_state(void);
 static GPIO_PinState board_service_status_led_off_state(void);
@@ -96,6 +100,44 @@ uint8_t board_service_console_uses_uart(uint8_t instance)
 uint8_t board_service_gps_uses_uart(uint8_t instance)
 {
     return (uint8_t)(board_service_uart_protocol(instance) == UART_PROTOCOL_GPS);
+}
+
+uint8_t board_service_can_debug_init(void)
+{
+    uint8_t instance = board_service_find_can_protocol(CAN_PROTOCOL_DEBUG);
+
+    return (instance != 0U) ? can_port_start(instance) : 0U;
+}
+
+uint8_t board_service_can_debug_write(uint16_t std_id,
+                                      const uint8_t *data,
+                                      uint8_t len)
+{
+    uint8_t instance = board_service_find_can_protocol(CAN_PROTOCOL_DEBUG);
+
+    return (instance != 0U) ?
+           can_port_write_std(instance, std_id, data, len) :
+           0U;
+}
+
+uint8_t board_service_can_debug_instance(void)
+{
+    return board_service_find_can_protocol(CAN_PROTOCOL_DEBUG);
+}
+
+uint8_t board_service_can_tx_mailboxes_are_full(uint8_t instance)
+{
+    return can_port_tx_mailboxes_are_full(instance);
+}
+
+uint8_t board_service_can_uses_debug(uint8_t instance)
+{
+    return (uint8_t)(board_service_can_protocol(instance) == CAN_PROTOCOL_DEBUG);
+}
+
+uint32_t board_service_can_take_error(uint8_t instance)
+{
+    return board_service_can_error_from_hal(can_port_take_error(instance));
 }
 
 void board_service_status_led_init(void)
@@ -410,4 +452,157 @@ static uint8_t board_service_find_uart_protocol(uart_protocol_t protocol)
     }
 
     return 0U;
+}
+
+static can_protocol_t board_service_can_protocol(uint8_t instance)
+{
+    if (instance == 1U)
+    {
+        return (can_protocol_t)param_get(PARAM_CAN1_PROTOCOL);
+    }
+
+    if (instance == 2U)
+    {
+        return (can_protocol_t)param_get(PARAM_CAN2_PROTOCOL);
+    }
+
+    return CAN_PROTOCOL_DISABLED;
+}
+
+static uint8_t board_service_find_can_protocol(can_protocol_t protocol)
+{
+    uint8_t instance;
+
+    for (instance = 1U; instance <= BOARD_CAN_INSTANCE_MAX; instance++)
+    {
+        if ((can_port_is_enabled(instance) != 0U) &&
+            (board_service_can_protocol(instance) == protocol))
+        {
+            return instance;
+        }
+    }
+
+    return 0U;
+}
+
+static uint32_t board_service_can_error_from_hal(uint32_t hal_error)
+{
+    uint32_t error = BOARD_SERVICE_CAN_ERROR_NONE;
+
+    if ((hal_error & HAL_CAN_ERROR_EWG) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_WARNING;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_EPV) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_PASSIVE;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_BOF) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_BUS_OFF;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_STF) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_STUFF;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_FOR) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_FORM;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_ACK) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_ACK;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_BR) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_BIT_RECESSIVE;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_BD) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_BIT_DOMINANT;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_CRC) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_CRC;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_RX_FOV0) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_RX_OVERRUN0;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_RX_FOV1) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_RX_OVERRUN1;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_TX_ALST0) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_TX_ARBITRATION_LOST0;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_TX_TERR0) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_TX0;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_TX_ALST1) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_TX_ARBITRATION_LOST1;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_TX_TERR1) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_TX1;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_TX_ALST2) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_TX_ARBITRATION_LOST2;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_TX_TERR2) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_TX2;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_TIMEOUT) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_TIMEOUT;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_NOT_INITIALIZED) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_NOT_INITIALIZED;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_NOT_READY) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_NOT_READY;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_NOT_STARTED) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_NOT_STARTED;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_PARAM) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_PARAM;
+    }
+
+    if ((hal_error & HAL_CAN_ERROR_INTERNAL) != 0U)
+    {
+        error |= BOARD_SERVICE_CAN_ERROR_INTERNAL;
+    }
+
+    return error;
 }

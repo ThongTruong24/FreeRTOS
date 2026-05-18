@@ -4,6 +4,7 @@
 #include "task.h"
 
 #include "app_board_slave.h"
+#include "app_can_debug.h"
 #include "app_debug.h"
 #include "app_gps.h"
 #include "app_led.h"
@@ -18,6 +19,7 @@ void app_main_init(void)
     app_gps_init();
     app_board_slave_init();
     app_task_init();
+    app_can_debug_init();
 }
 
 void app_main_start(void)

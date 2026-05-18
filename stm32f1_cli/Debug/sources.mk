@@ -23,6 +23,7 @@ C_DEPS :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 Application/app_board_slave \
+Application/app_can_debug \
 Application/app_debug \
 Application/app_gps \
 Application/app_led \
@@ -31,6 +32,7 @@ Application/app_task \
 Application/protocol \
 BSP/board_devices \
 BSP/board_service \
+BSP/can_port \
 BSP/debug_port \
 BSP/gpio_port \
 BSP/hal_callbacks \

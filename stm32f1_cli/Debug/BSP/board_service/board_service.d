@@ -19,14 +19,16 @@ BSP/board_service/board_service.o: ../BSP/board_service/board_service.c \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_exti.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma_ex.h \
+ ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_can.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
- ../BSP/gpio_port/gpio_port.h ../BSP/i2c_port/i2c_port.h \
- ../BSP/board_service/param.h ../BSP/slave_link_port/slave_link_port.h \
- ../BSP/spi_port/spi_port.h ../BSP/uart_port/uart_port.h
+ ../BSP/can_port/can_port.h ../BSP/gpio_port/gpio_port.h \
+ ../BSP/i2c_port/i2c_port.h ../BSP/board_service/param.h \
+ ../BSP/slave_link_port/slave_link_port.h ../BSP/spi_port/spi_port.h \
+ ../BSP/uart_port/uart_port.h
 ../BSP/board_service/board_service.h:
 ../BSP/board_devices/board_devices.h:
 ../Core/Inc/main.h:
@@ -48,11 +50,13 @@ BSP/board_service/board_service.o: ../BSP/board_service/board_service.c \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_exti.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma_ex.h:
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_can.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
+../BSP/can_port/can_port.h:
 ../BSP/gpio_port/gpio_port.h:
 ../BSP/i2c_port/i2c_port.h:
 ../BSP/board_service/param.h:

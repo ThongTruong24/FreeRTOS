@@ -1,4 +1,12 @@
-../BSP/hal_callbacks/hal_callbacks.c:18:6:hal_callbacks_init	16	static
-../BSP/hal_callbacks/hal_callbacks.c:35:6:HAL_UART_RxCpltCallback	24	static
-../BSP/hal_callbacks/hal_callbacks.c:71:6:HAL_UART_ErrorCallback	24	static
-../BSP/hal_callbacks/hal_callbacks.c:90:17:hal_callbacks_uart_rx_byte_buffer	16	static
+../BSP/hal_callbacks/hal_callbacks.c:25:6:hal_callbacks_init	16	static
+../BSP/hal_callbacks/hal_callbacks.c:42:6:HAL_UART_RxCpltCallback	24	static
+../BSP/hal_callbacks/hal_callbacks.c:78:6:HAL_UART_ErrorCallback	24	static
+../BSP/hal_callbacks/hal_callbacks.c:97:17:hal_callbacks_uart_rx_byte_buffer	16	static
+../BSP/hal_callbacks/hal_callbacks.c:110:6:HAL_CAN_TxMailbox0CompleteCallback	16	static
+../BSP/hal_callbacks/hal_callbacks.c:115:6:HAL_CAN_TxMailbox1CompleteCallback	16	static
+../BSP/hal_callbacks/hal_callbacks.c:120:6:HAL_CAN_TxMailbox2CompleteCallback	16	static
+../BSP/hal_callbacks/hal_callbacks.c:125:6:HAL_CAN_TxMailbox0AbortCallback	16	static
+../BSP/hal_callbacks/hal_callbacks.c:130:6:HAL_CAN_TxMailbox1AbortCallback	16	static
+../BSP/hal_callbacks/hal_callbacks.c:135:6:HAL_CAN_TxMailbox2AbortCallback	16	static
+../BSP/hal_callbacks/hal_callbacks.c:140:6:HAL_CAN_ErrorCallback	16	static
+../BSP/hal_callbacks/hal_callbacks.c:145:13:hal_callbacks_post_can_status_from_isr	48	static,ignoring_inline_asm

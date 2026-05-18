@@ -26,6 +26,7 @@ static int app_debug_split_args(char *command, char **argv, int argv_max);
 static void app_debug_handle_led_command(int argc, char **argv);
 static void app_debug_handle_param_command(int argc, char **argv);
 static void app_debug_handle_gps_command(int argc, char **argv);
+static void app_debug_handle_can_command(int argc, char **argv);
 static void app_debug_print_command_list(void);
 static void app_debug_print_led_usage(void);
 static void app_debug_print_board_slave_led_usage(void);
@@ -55,9 +56,14 @@ static uint16_t app_debug_text_len(const char *text);
 static void app_debug_post_led_control(app_msg_id_t id,
                                        const app_led_control_msg_t *control);
 static void app_debug_post_board_slave_led_request(void);
+static void app_debug_post_can_debug_tx(const app_can_frame_msg_t *frame);
 static void app_debug_print_param_table(void);
 static void app_debug_print_gps_snapshot(void);
 static void app_debug_print_text_or_dash(const char *text);
+static void app_debug_print_can_error_detail(uint32_t error_code);
+static void app_debug_print_can_error_group(uint32_t error_code,
+                                            uint32_t group_mask,
+                                            const char *label);
 static void app_debug_write_i32(int32_t value);
 static void app_debug_write_u32(uint32_t value);
 
@@ -119,6 +125,43 @@ void app_debug_handle_message(const app_msg_t *msg)
             app_debug_print(" remaining=");
             app_debug_write_u32(msg->payload.led_status.remaining_count);
             app_debug_print("\r\n");
+            break;
+
+        case APP_MSG_CAN_STATUS:
+            if (msg->payload.can_status.event == CAN_STATUS_STARTED)
+            {
+                app_debug_print("can debug ready instance=");
+                app_debug_write_u32(msg->payload.can_status.instance);
+                app_debug_print("\r\n");
+            }
+            else if (msg->payload.can_status.event == CAN_STATUS_TX_QUEUED)
+            {
+                app_debug_print("ok\r\n");
+            }
+            else if (msg->payload.can_status.event == CAN_STATUS_TX_ABORTED)
+            {
+                app_debug_print("err: can tx aborted instance=");
+                app_debug_write_u32(msg->payload.can_status.instance);
+                app_debug_print_can_error_detail(msg->payload.can_status.error_code);
+                app_debug_print(" code=");
+                app_debug_write_u32(msg->payload.can_status.error_code);
+                app_debug_print("\r\n");
+            }
+            else if (msg->payload.can_status.event == CAN_STATUS_TX_MAILBOX_FULL)
+            {
+                app_debug_print("err: can tx mailbox full instance=");
+                app_debug_write_u32(msg->payload.can_status.instance);
+                app_debug_print("\r\n");
+            }
+            else if (msg->payload.can_status.event == CAN_STATUS_ERROR)
+            {
+                app_debug_print("err: can instance=");
+                app_debug_write_u32(msg->payload.can_status.instance);
+                app_debug_print_can_error_detail(msg->payload.can_status.error_code);
+                app_debug_print(" code=");
+                app_debug_write_u32(msg->payload.can_status.error_code);
+                app_debug_print("\r\n");
+            }
             break;
 
         default:
@@ -208,6 +251,10 @@ static void app_debug_execute_command(char *command)
     else if (app_debug_streq(argv[0], "BN-220") != 0U)
     {
         app_debug_handle_gps_command(argc, argv);
+    }
+    else if (app_debug_streq(argv[0], "can") != 0U)
+    {
+        app_debug_handle_can_command(argc, argv);
     }
     else
     {
@@ -311,6 +358,49 @@ static void app_debug_handle_gps_command(int argc, char **argv)
     app_debug_print("usage: BN-220 GPS;\r\n");
 }
 
+static void app_debug_handle_can_command(int argc, char **argv)
+{
+    app_can_frame_msg_t frame = {0};
+    uint32_t parsed;
+    int index;
+
+    if ((argc < 4) || (app_debug_streq(argv[1], "test") == 0U))
+    {
+        app_debug_print("usage: can test <id> <len> [data...];\r\n");
+        return;
+    }
+
+    if ((app_debug_parse_u32_limit(argv[2], 0x7FFU, &parsed) == 0U))
+    {
+        app_debug_print("err: can id must be 0..0x7FF\r\n");
+        return;
+    }
+
+    frame.std_id = (uint16_t)parsed;
+
+    if ((app_debug_parse_u32_limit(argv[3], 8U, &parsed) == 0U) ||
+        (argc != (4 + (int)parsed)))
+    {
+        app_debug_print("usage: can test <id> <len> [data...];\r\n");
+        return;
+    }
+
+    frame.len = (uint8_t)parsed;
+
+    for (index = 0; index < frame.len; index++)
+    {
+        if (app_debug_parse_u32_limit(argv[4 + index], 255U, &parsed) == 0U)
+        {
+            app_debug_print("err: can data byte must be 0..0xFF\r\n");
+            return;
+        }
+
+        frame.data[index] = (uint8_t)parsed;
+    }
+
+    app_debug_post_can_debug_tx(&frame);
+}
+
 static void app_debug_print_command_list(void)
 {
     app_debug_print(
@@ -318,6 +408,7 @@ static void app_debug_print_command_list(void)
         "  show;\r\n"
         "  param show;\r\n"
         "  BN-220 GPS;\r\n"
+        "  can test <id> <len> [data...];\r\n"
         "  led on|off|toggle;\r\n"
         "  led blink <hz> <count>;\r\n"
         "  led board slave on|off|toggle;\r\n"
@@ -608,6 +699,16 @@ static void app_debug_post_board_slave_led_request(void)
     (void)app_task_post(&msg, 0U);
 }
 
+static void app_debug_post_can_debug_tx(const app_can_frame_msg_t *frame)
+{
+    app_msg_t msg = {0};
+
+    msg.id = APP_MSG_CAN_DEBUG_TX;
+    msg.len = sizeof(msg.payload.can_frame);
+    msg.payload.can_frame = *frame;
+    (void)app_task_post(&msg, 0U);
+}
+
 static void app_debug_print_param_table(void)
 {
     param_id_t id;
@@ -718,6 +819,106 @@ static void app_debug_print_text_or_dash(const char *text)
     }
 
     app_debug_print(text);
+}
+
+static void app_debug_print_can_error_detail(uint32_t error_code)
+{
+    app_debug_print_can_error_group(
+        error_code,
+        BOARD_SERVICE_CAN_ERROR_WARNING |
+        BOARD_SERVICE_CAN_ERROR_PASSIVE |
+        BOARD_SERVICE_CAN_ERROR_BUS_OFF,
+        " state=");
+
+    app_debug_print_can_error_group(
+        error_code,
+        BOARD_SERVICE_CAN_ERROR_STUFF |
+        BOARD_SERVICE_CAN_ERROR_FORM |
+        BOARD_SERVICE_CAN_ERROR_ACK |
+        BOARD_SERVICE_CAN_ERROR_BIT_RECESSIVE |
+        BOARD_SERVICE_CAN_ERROR_BIT_DOMINANT |
+        BOARD_SERVICE_CAN_ERROR_CRC,
+        " cause=");
+
+    app_debug_print_can_error_group(
+        error_code,
+        BOARD_SERVICE_CAN_ERROR_RX_OVERRUN0 |
+        BOARD_SERVICE_CAN_ERROR_RX_OVERRUN1 |
+        BOARD_SERVICE_CAN_ERROR_TX_ARBITRATION_LOST0 |
+        BOARD_SERVICE_CAN_ERROR_TX0 |
+        BOARD_SERVICE_CAN_ERROR_TX_ARBITRATION_LOST1 |
+        BOARD_SERVICE_CAN_ERROR_TX1 |
+        BOARD_SERVICE_CAN_ERROR_TX_ARBITRATION_LOST2 |
+        BOARD_SERVICE_CAN_ERROR_TX2,
+        " detail=");
+
+    app_debug_print_can_error_group(
+        error_code,
+        BOARD_SERVICE_CAN_ERROR_TIMEOUT |
+        BOARD_SERVICE_CAN_ERROR_NOT_INITIALIZED |
+        BOARD_SERVICE_CAN_ERROR_NOT_READY |
+        BOARD_SERVICE_CAN_ERROR_NOT_STARTED |
+        BOARD_SERVICE_CAN_ERROR_PARAM |
+        BOARD_SERVICE_CAN_ERROR_INTERNAL,
+        " driver=");
+}
+
+static void app_debug_print_can_error_group(uint32_t error_code,
+                                            uint32_t group_mask,
+                                            const char *label)
+{
+    uint8_t printed = 0U;
+
+    if ((error_code & group_mask) == 0U)
+    {
+        return;
+    }
+
+    app_debug_print(label);
+
+#define APP_DEBUG_CAN_PRINT_ERROR(flag, text)                \
+    do                                                       \
+    {                                                        \
+        if (((group_mask & (flag)) != 0U) &&                 \
+            ((error_code & (flag)) != 0U))                   \
+        {                                                    \
+            if (printed != 0U)                               \
+            {                                                \
+                app_debug_print("|");                        \
+            }                                                \
+            app_debug_print((text));                         \
+            printed = 1U;                                    \
+        }                                                    \
+    } while (0)
+
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_WARNING, "warning");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_PASSIVE, "passive");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_BUS_OFF, "bus_off");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_STUFF, "stuff");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_FORM, "form");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_ACK, "ack");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_BIT_RECESSIVE, "bit_recessive");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_BIT_DOMINANT, "bit_dominant");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_CRC, "crc");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_RX_OVERRUN0, "rx_overrun0");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_RX_OVERRUN1, "rx_overrun1");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_TX_ARBITRATION_LOST0,
+                              "tx_arbitration_lost0");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_TX0, "tx_error0");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_TX_ARBITRATION_LOST1,
+                              "tx_arbitration_lost1");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_TX1, "tx_error1");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_TX_ARBITRATION_LOST2,
+                              "tx_arbitration_lost2");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_TX2, "tx_error2");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_TIMEOUT, "timeout");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_NOT_INITIALIZED, "not_initialized");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_NOT_READY, "not_ready");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_NOT_STARTED, "not_started");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_PARAM, "param");
+    APP_DEBUG_CAN_PRINT_ERROR(BOARD_SERVICE_CAN_ERROR_INTERNAL, "internal");
+
+#undef APP_DEBUG_CAN_PRINT_ERROR
 }
 
 static void app_debug_write_i32(int32_t value)

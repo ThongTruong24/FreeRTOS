@@ -24,6 +24,18 @@ extern I2C_HandleTypeDef hi2c1;
 extern I2C_HandleTypeDef hi2c2;
 #endif
 
+#if BOARD_HAS_CAN1
+/*
+ * CubeMX names the single CAN handle on the current STM32F1 board "hcan".
+ * On a board with CAN1/CAN2 handles, update this board-specific mapping only.
+ */
+extern CAN_HandleTypeDef hcan;
+#endif
+
+#if BOARD_HAS_CAN2
+extern CAN_HandleTypeDef hcan2;
+#endif
+
 UART_HandleTypeDef *board_devices_get_uart(uint8_t instance)
 {
     switch (instance)
@@ -85,6 +97,27 @@ I2C_HandleTypeDef *board_devices_get_i2c(uint8_t instance)
 }
 #endif
 
+#if BOARD_HAS_ANY_CAN
+CAN_HandleTypeDef *board_devices_get_can(uint8_t instance)
+{
+    switch (instance)
+    {
+#if BOARD_HAS_CAN1
+        case 1U:
+            return &hcan;
+#endif
+
+#if BOARD_HAS_CAN2
+        case 2U:
+            return &hcan2;
+#endif
+
+        default:
+            return 0;
+    }
+}
+#endif
+
 uint8_t board_devices_uart_instance_from_handle(const UART_HandleTypeDef *uart)
 {
 #if BOARD_HAS_UART1
@@ -137,6 +170,27 @@ uint8_t board_devices_i2c_instance_from_handle(const I2C_HandleTypeDef *i2c)
 
 #if BOARD_HAS_I2C2
     if (i2c == &hi2c2)
+    {
+        return 2U;
+    }
+#endif
+
+    return 0U;
+}
+#endif
+
+#if BOARD_HAS_ANY_CAN
+uint8_t board_devices_can_instance_from_handle(const CAN_HandleTypeDef *can)
+{
+#if BOARD_HAS_CAN1
+    if (can == &hcan)
+    {
+        return 1U;
+    }
+#endif
+
+#if BOARD_HAS_CAN2
+    if (can == &hcan2)
     {
         return 2U;
     }

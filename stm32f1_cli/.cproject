@@ -46,8 +46,10 @@
 									<listOptionValue builtIn="false" value="../Application/message"/>
 									<listOptionValue builtIn="false" value="../BSP/board_service"/>
 									<listOptionValue builtIn="false" value="../BSP/board_devices"/>
+									<listOptionValue builtIn="false" value="../BSP/can_port"/>
 									<listOptionValue builtIn="false" value="../Application/protocol"/>
 									<listOptionValue builtIn="false" value="../Application/app_board_slave"/>
+									<listOptionValue builtIn="false" value="../Application/app_can_debug"/>
 									<listOptionValue builtIn="false" value="../Application/app_debug"/>
 									<listOptionValue builtIn="false" value="../Application/app_gps"/>
 									<listOptionValue builtIn="false" value="../Application/app_led"/>
@@ -145,8 +147,10 @@
 									<listOptionValue builtIn="false" value="../Application/message"/>
 									<listOptionValue builtIn="false" value="../BSP/board_service"/>
 									<listOptionValue builtIn="false" value="../BSP/board_devices"/>
+									<listOptionValue builtIn="false" value="../BSP/can_port"/>
 									<listOptionValue builtIn="false" value="../Application/protocol"/>
 									<listOptionValue builtIn="false" value="../Application/app_board_slave"/>
+									<listOptionValue builtIn="false" value="../Application/app_can_debug"/>
 									<listOptionValue builtIn="false" value="../Application/app_debug"/>
 									<listOptionValue builtIn="false" value="../Application/app_gps"/>
 									<listOptionValue builtIn="false" value="../Application/app_led"/>

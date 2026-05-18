@@ -4,8 +4,10 @@
 
 #include "app_debug.h"
 #include "app_gps.h"
+#include "app_task.h"
 #include "board_devices.h"
 #include "board_service.h"
+#include "can_port.h"
 #include "i2c_port.h"
 #include "slave_link_port.h"
 #include "spi_port.h"
@@ -14,6 +16,11 @@
 static uint8_t s_uart_rx_byte[BOARD_UART_INSTANCE_MAX + 1U];
 
 static uint8_t *hal_callbacks_uart_rx_byte_buffer(uint8_t instance);
+#if BOARD_HAS_ANY_CAN
+static uint32_t s_can_last_error[BOARD_CAN_INSTANCE_MAX + 1U];
+static void hal_callbacks_post_can_status_from_isr(CAN_HandleTypeDef *hcan,
+                                                   app_can_status_event_t event);
+#endif
 
 void hal_callbacks_init(void)
 {
@@ -98,6 +105,90 @@ static uint8_t *hal_callbacks_uart_rx_byte_buffer(uint8_t instance)
 
     return &s_uart_rx_byte[instance];
 }
+
+#if BOARD_HAS_ANY_CAN
+void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan)
+{
+    hal_callbacks_post_can_status_from_isr(hcan, CAN_STATUS_TX_COMPLETE);
+}
+
+void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan)
+{
+    hal_callbacks_post_can_status_from_isr(hcan, CAN_STATUS_TX_COMPLETE);
+}
+
+void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *hcan)
+{
+    hal_callbacks_post_can_status_from_isr(hcan, CAN_STATUS_TX_COMPLETE);
+}
+
+void HAL_CAN_TxMailbox0AbortCallback(CAN_HandleTypeDef *hcan)
+{
+    hal_callbacks_post_can_status_from_isr(hcan, CAN_STATUS_TX_ABORTED);
+}
+
+void HAL_CAN_TxMailbox1AbortCallback(CAN_HandleTypeDef *hcan)
+{
+    hal_callbacks_post_can_status_from_isr(hcan, CAN_STATUS_TX_ABORTED);
+}
+
+void HAL_CAN_TxMailbox2AbortCallback(CAN_HandleTypeDef *hcan)
+{
+    hal_callbacks_post_can_status_from_isr(hcan, CAN_STATUS_TX_ABORTED);
+}
+
+void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
+{
+    hal_callbacks_post_can_status_from_isr(hcan, CAN_STATUS_ERROR);
+}
+
+static void hal_callbacks_post_can_status_from_isr(CAN_HandleTypeDef *hcan,
+                                                   app_can_status_event_t event)
+{
+    uint8_t instance;
+    uint32_t error_code = 0U;
+    BaseType_t higher_priority_task_woken = pdFALSE;
+    app_msg_t msg = {0};
+
+    if (hcan == NULL)
+    {
+        return;
+    }
+
+    instance = can_port_instance_from_handle(hcan);
+
+    if (board_service_can_uses_debug(instance) == 0U)
+    {
+        return;
+    }
+
+    if (event == CAN_STATUS_ERROR)
+    {
+        error_code = board_service_can_take_error(instance);
+
+        if ((error_code == BOARD_SERVICE_CAN_ERROR_NONE) ||
+            (error_code == s_can_last_error[instance]))
+        {
+            return;
+        }
+
+        s_can_last_error[instance] = error_code;
+    }
+    else if (event == CAN_STATUS_TX_COMPLETE)
+    {
+        s_can_last_error[instance] = BOARD_SERVICE_CAN_ERROR_NONE;
+    }
+
+    msg.id = APP_MSG_CAN_STATUS;
+    msg.len = sizeof(msg.payload.can_status);
+    msg.payload.can_status.instance = instance;
+    msg.payload.can_status.event = (uint8_t)event;
+    msg.payload.can_status.error_code = error_code;
+
+    (void)app_task_post_from_isr(&msg, &higher_priority_task_woken);
+    portYIELD_FROM_ISR(higher_priority_task_woken);
+}
+#endif
 
 #if BOARD_HAS_ANY_SPI
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)

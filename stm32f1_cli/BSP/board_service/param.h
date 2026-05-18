@@ -10,6 +10,8 @@ typedef enum {
     PARAM_SPI2_PROTOCOL,
     PARAM_I2C1_PROTOCOL,
     PARAM_I2C2_PROTOCOL,
+    PARAM_CAN1_PROTOCOL,
+    PARAM_CAN2_PROTOCOL,
     PARAM_PROTO_TIMEOUT_MS,
     PARAM_LED_DEFAULT_HZ,
     PARAM_LED_DEFAULT_COUNT,
@@ -27,6 +29,12 @@ typedef enum {
     BUS_PROTOCOL_DISABLED = 0,
     BUS_PROTOCOL_SLAVE = 1
 } slave_bus_protocol_t;
+
+typedef enum {
+    CAN_PROTOCOL_DISABLED = 0,
+    CAN_PROTOCOL_DEBUG = 1,
+    CAN_PROTOCOL_DRONECAN = 2,
+} can_protocol_t;
 
 const char *param_name(param_id_t id);
 int32_t param_get(param_id_t id);

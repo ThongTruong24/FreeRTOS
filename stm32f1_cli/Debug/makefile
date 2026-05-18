@@ -23,6 +23,7 @@ RM := rm -rf
 -include BSP/hal_callbacks/subdir.mk
 -include BSP/gpio_port/subdir.mk
 -include BSP/debug_port/subdir.mk
+-include BSP/can_port/subdir.mk
 -include BSP/board_service/subdir.mk
 -include BSP/board_devices/subdir.mk
 -include Application/protocol/subdir.mk
@@ -31,6 +32,7 @@ RM := rm -rf
 -include Application/app_led/subdir.mk
 -include Application/app_gps/subdir.mk
 -include Application/app_debug/subdir.mk
+-include Application/app_can_debug/subdir.mk
 -include Application/app_board_slave/subdir.mk
 -include objects.mk
 

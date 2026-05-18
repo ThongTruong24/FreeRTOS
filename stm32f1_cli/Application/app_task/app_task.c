@@ -4,6 +4,7 @@
 #include "task.h"
 
 #include "app_board_slave.h"
+#include "app_can_debug.h"
 #include "app_debug.h"
 #include "app_gps.h"
 #include "app_led.h"
@@ -138,7 +139,12 @@ static void app_main_task(void *argument)
                     app_board_slave_handle_message(&msg);
                     break;
 
+                case APP_MSG_CAN_DEBUG_TX:
+                    app_can_debug_handle_message(&msg);
+                    break;
+
                 case APP_MSG_LED_STATUS:
+                case APP_MSG_CAN_STATUS:
                     app_debug_handle_message(&msg);
                     break;
 

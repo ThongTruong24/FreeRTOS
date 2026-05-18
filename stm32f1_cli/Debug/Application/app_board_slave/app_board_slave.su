@@ -11,5 +11,5 @@
 ../Application/app_board_slave/app_board_slave.c:209:13:app_board_slave_encode_led_payload	16	static
 ../Application/app_board_slave/app_board_slave.c:222:13:app_board_slave_encode_led_status_payload	16	static
 ../Application/app_board_slave/app_board_slave.c:235:13:app_board_slave_decode_frame	16	static
-../Application/app_board_slave/app_board_slave.c:261:13:app_board_slave_decode_led_control	32	static
-../Application/app_board_slave/app_board_slave.c:284:13:app_board_slave_decode_led_status	32	static
+../Application/app_board_slave/app_board_slave.c:261:13:app_board_slave_decode_led_control	40	static
+../Application/app_board_slave/app_board_slave.c:284:13:app_board_slave_decode_led_status	40	static

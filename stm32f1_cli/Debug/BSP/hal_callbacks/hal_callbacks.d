@@ -18,16 +18,25 @@ BSP/hal_callbacks/hal_callbacks.o: ../BSP/hal_callbacks/hal_callbacks.c \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_exti.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma_ex.h \
+ ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_can.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
  ../Application/app_debug/app_debug.h ../Application/message/message.h \
- ../Application/app_gps/app_gps.h ../BSP/board_devices/board_devices.h \
- ../BSP/board_service/board_service.h ../BSP/i2c_port/i2c_port.h \
- ../BSP/slave_link_port/slave_link_port.h ../BSP/spi_port/spi_port.h \
- ../BSP/uart_port/uart_port.h
+ ../Application/app_gps/app_gps.h ../Application/app_task/app_task.h \
+ D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/FreeRTOS.h \
+ D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/FreeRTOSConfig.h \
+ D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/projdefs.h \
+ D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/portable.h \
+ D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/deprecated_definitions.h \
+ D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/portable/GCC/ARM_CM3/portmacro.h \
+ D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/mpu_wrappers.h \
+ ../BSP/board_devices/board_devices.h \
+ ../BSP/board_service/board_service.h ../BSP/can_port/can_port.h \
+ ../BSP/i2c_port/i2c_port.h ../BSP/slave_link_port/slave_link_port.h \
+ ../BSP/spi_port/spi_port.h ../BSP/uart_port/uart_port.h
 ../BSP/hal_callbacks/hal_callbacks.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
@@ -48,6 +57,7 @@ BSP/hal_callbacks/hal_callbacks.o: ../BSP/hal_callbacks/hal_callbacks.c \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_exti.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma_ex.h:
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_can.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h:
@@ -56,8 +66,17 @@ BSP/hal_callbacks/hal_callbacks.o: ../BSP/hal_callbacks/hal_callbacks.c \
 ../Application/app_debug/app_debug.h:
 ../Application/message/message.h:
 ../Application/app_gps/app_gps.h:
+../Application/app_task/app_task.h:
+D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/FreeRTOS.h:
+D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/FreeRTOSConfig.h:
+D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/projdefs.h:
+D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/portable.h:
+D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/deprecated_definitions.h:
+D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/portable/GCC/ARM_CM3/portmacro.h:
+D:/thuviec/FreeRTOS/stm32f1_cli/Middleware/FreeRTOS-Kernel/include/mpu_wrappers.h:
 ../BSP/board_devices/board_devices.h:
 ../BSP/board_service/board_service.h:
+../BSP/can_port/can_port.h:
 ../BSP/i2c_port/i2c_port.h:
 ../BSP/slave_link_port/slave_link_port.h:
 ../BSP/spi_port/spi_port.h:
