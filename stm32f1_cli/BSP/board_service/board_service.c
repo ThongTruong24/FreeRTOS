@@ -109,14 +109,14 @@ uint8_t board_service_can_debug_init(void)
     return (instance != 0U) ? can_port_start(instance) : 0U;
 }
 
-uint8_t board_service_can_debug_write(uint16_t std_id,
+uint8_t board_service_can_debug_write(uint32_t ext_id,
                                       const uint8_t *data,
                                       uint8_t len)
 {
     uint8_t instance = board_service_find_can_protocol(CAN_PROTOCOL_DEBUG);
 
     return (instance != 0U) ?
-           can_port_write_std(instance, std_id, data, len) :
+           can_port_write_ext(instance, ext_id, data, len) :
            0U;
 }
 
